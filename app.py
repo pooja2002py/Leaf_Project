@@ -4,21 +4,30 @@ from PIL import Image
 import tensorflow as tf
 
 # Load Models
-mobilenet_model = tf.keras.models.load_model("MobileNetV2_model.h5")
-resnet_model = tf.keras.models.load_model("ResNet_model.h5")
-cnn_model = tf.keras.models.load_model("leaf_model.h5")
-
-# Class Names
-class_names = ["Healthy", "boron", "kalium", "mg", "nitrogen"]
-
-# UI design
-st.title("🌿Palm Oil Leaf Nutrient Stress Detection")
+@st.cache_resource
+def load_model(model_name):
+    if model_name == "MobileNetV2":
+        return tf.keras.models.load_model("MobileNetV2_model.h5")
+    elif model_name == "ResNet50":
+        return tf.keras.models.load_model("ResNet_model.h5")
+    else:
+        return tf.keras.models.load_model("leaf_model.h5")
 
 model_choice = st.selectbox(
     "Select Model",
     ["MobileNetV2", "ResNet50", "CNN"]
 )
 
+model = load_model(model_choice)
+# mobilenet_model = tf.keras.models.load_model("MobileNetV2_model.h5")
+# resnet_model = tf.keras.models.load_model("ResNet_model.h5")
+# cnn_model = tf.keras.models.load_model("leaf_model.h5")
+
+# Class Names
+class_names = ["Healthy", "boron", "kalium", "mg", "nitrogen"]
+
+# UI design
+st.title("🌿Palm Oil Leaf Nutrient Stress Detection")
 uploaded_file = st.file_uploader("Upload Leaf Image", type=["jpg", "png", "jpeg"])
 
 # Prediction
