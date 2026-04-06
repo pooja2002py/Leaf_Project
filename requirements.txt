@@ -1,0 +1,9 @@
+tensorflow==2.13.0
+numpy
+pandas
+opencv-python
+scikit-learn
+matplotlib
+seaborn 
+streamlit==1.25.0 
+scipy=1.10.1
