@@ -35,15 +35,15 @@ if uploaded_file is not None:
     # STEP 5: SELECT MODEL PATH + SIZE
     # -----------------------
     if model_choice == "MobileNetV2":
-        model_path = "MobileNetV2_model.h5"
+        model_path = "C:\mydesktop\Classification_project\MobileNetV2_model.h5"
         size = (224, 224)
 
     elif model_choice == "ResNet50":
-        model_path = "ResNet_model.h5"
+        model_path = "C:\mydesktop\Classification_project\ResNet_model.h5"
         size = (224, 224)
 
     else:
-        model_path = "leaf_model.h5"
+        model_path = "C:\mydesktop\Classification_project\leaf_model.h5"
         size = (150, 150)
 
     # -----------------------
