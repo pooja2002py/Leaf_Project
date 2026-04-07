@@ -2,40 +2,16 @@ import streamlit as st
 import numpy as np
 from PIL import Image
 import tensorflow as tf
-import gdown
-import os
 
 # -------------------------------
-# Download Models (FINAL FIX)
-# -------------------------------
-def download_model(drive_link, output_name):
-    if not os.path.exists(output_name):
-        st.write(f"Downloading {output_name}...")
-        gdown.download(drive_link, output_name, quiet=False, fuzzy=True)
-
-# -------------------------------
-# Load Models (Cached)
+# Load Models (NO DOWNLOAD)
 # -------------------------------
 @st.cache_resource
 def load_models():
-
-    # 🔥 FULL GOOGLE DRIVE LINKS (IMPORTANT)
-    mobilenet_link = "https://drive.google.com/file/d/1jTroVKuF-e_Sb5AT5jj-W6wHIBejmsjz/view?usp=sharing"
-    cnn_link = "https://drive.google.com/file/d/1JYRGz34z72QOn3B1cSb5_4Gu5KCTVRRM/view?usp=sharing"
-
-    # Download models
-    download_model(mobilenet_link, "MobileNetV2.h5")
-    download_model(cnn_link, "CNN.h5")
-
-    # Load models safely
     mobilenet_model = tf.keras.models.load_model("MobileNetV2.h5", compile=False)
     cnn_model = tf.keras.models.load_model("CNN.h5", compile=False)
-
     return mobilenet_model, cnn_model
 
-# -------------------------------
-# Load models
-# -------------------------------
 mobilenet_model, cnn_model = load_models()
 
 # -------------------------------
@@ -64,15 +40,10 @@ if uploaded_file is not None:
     st.image(image, caption="Uploaded Image")
 
     # Select model
-    if model_choice == "MobileNetV2":
-        model = mobilenet_model
-    else:
-        model = cnn_model
+    model = mobilenet_model if model_choice == "MobileNetV2" else cnn_model
 
-    # 🔥 AUTO INPUT SIZE (NO ERROR)
-    input_shape = model.input_shape
-    height, width = input_shape[1], input_shape[2]
-
+    # Auto resize
+    height, width = model.input_shape[1], model.input_shape[2]
     image = image.resize((height, width))
 
     # Preprocess
@@ -82,14 +53,9 @@ if uploaded_file is not None:
     # Predict
     prediction = model.predict(image)
 
-    predicted_class = np.argmax(prediction)
-    confidence = np.max(prediction)
+    st.success(f"Prediction: {class_names[np.argmax(prediction)]}")
+    st.write(f"Confidence: {np.max(prediction)*100:.2f}%")
 
-    # Output
-    st.success(f"Prediction: {class_names[predicted_class]}")
-    st.write(f"Confidence: {confidence*100:.2f}%")
-
-    # Probabilities
     st.subheader("Class Probabilities")
     for i, prob in enumerate(prediction[0]):
         st.write(f"{class_names[i]} : {prob*100:.2f}%")
