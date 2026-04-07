@@ -6,11 +6,14 @@ import gdown
 import os
 
 # -------------------------------
-# Download Models
+# Download Models (FIXED)
 # -------------------------------
 def download_model(file_id, output_name):
-    if not os.path.exists(output_name):
-        url = f"https://drive.google.com/uc?id={file_id}"
+    url = f"https://drive.google.com/uc?id={file_id}"
+
+    # 🔥 FIX: check file exists AND size (avoid corrupted file)
+    if not os.path.exists(output_name) or os.path.getsize(output_name) < 1000000:
+        st.write(f"Downloading {output_name}...")
         gdown.download(url, output_name, quiet=False)
 
 # -------------------------------
@@ -18,7 +21,6 @@ def download_model(file_id, output_name):
 # -------------------------------
 @st.cache_resource
 def load_models():
-    # 🔥 REPLACE THESE WITH YOUR FILE IDs
     mobilenet_id = "1jTroVKuF-e_Sb5AT5jj-W6wHIBejmsjz"
     resnet_id = "1fmA2GlwgevN8OjguASYb0pn2EZIFSnkw"
     cnn_id = "1JYRGz34z72QOn3B1cSb5_4Gu5KCTVRRM"
@@ -28,14 +30,14 @@ def load_models():
     download_model(resnet_id, "ResNet.h5")
     download_model(cnn_id, "CNN.h5")
 
-    # Load models
-    mobilenet_model = tf.keras.models.load_model("MobileNetV2.h5")
-    resnet_model = tf.keras.models.load_model("ResNet.h5")
-    cnn_model = tf.keras.models.load_model("CNN.h5")
+    # 🔥 FIX: compile=False (important)
+    mobilenet_model = tf.keras.models.load_model("MobileNetV2.h5", compile=False)
+    resnet_model = tf.keras.models.load_model("ResNet.h5", compile=False)
+    cnn_model = tf.keras.models.load_model("CNN.h5", compile=False)
 
     return mobilenet_model, resnet_model, cnn_model
 
-# Load all models
+# Load models
 mobilenet_model, resnet_model, cnn_model = load_models()
 
 # -------------------------------
