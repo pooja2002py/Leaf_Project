@@ -32,7 +32,7 @@ if uploaded_file is not None:
 
     else:
         model_path = "leaf_model.h5"
-        size = (150, 150)
+        size = (224, 224)
         
     # STEP 6: CHECK FILE EXISTS
     if not os.path.exists(model_path):
