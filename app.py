@@ -2,63 +2,94 @@ import streamlit as st
 import numpy as np
 from PIL import Image
 import tensorflow as tf
+import gdown
 import os
 
-# STEP 1: TITLE
+# -------------------------------
+# Download Models
+# -------------------------------
+def download_model(file_id, output_name):
+    if not os.path.exists(output_name):
+        url = f"https://drive.google.com/uc?id={file_id}"
+        gdown.download(url, output_name, quiet=False)
+
+# -------------------------------
+# Load Models (Cached)
+# -------------------------------
+@st.cache_resource
+def load_models():
+    # 🔥 REPLACE THESE WITH YOUR FILE IDs
+    mobilenet_id = "1jTroVKuF-e_Sb5AT5jj-W6wHIBejmsjz"
+    resnet_id = "1fmA2GlwgevN8OjguASYb0pn2EZIFSnkw"
+    cnn_id = "1JYRGz34z72QOn3B1cSb5_4Gu5KCTVRRM"
+
+    # Download models
+    download_model(mobilenet_id, "MobileNetV2_model.h5")
+    download_model(resnet_id, "ResNet_model.h5")
+    download_model(cnn_id, "leaf_model.h5")
+
+    # Load models
+    mobilenet_model = tf.keras.models.load_model("MobileNetV2_model.h5")
+    resnet_model = tf.keras.models.load_model("ResNet_model.h5")
+    cnn_model = tf.keras.models.load_model("leaf_model.h5")
+
+    return mobilenet_model, resnet_model, cnn_model
+
+# Load all models
+mobilenet_model, resnet_model, cnn_model = load_models()
+
+# -------------------------------
+# Class Names
+# -------------------------------
+class_names = ["Healthy", "boron", "kalium", "mg", "nitrogen"]
+
+# -------------------------------
+# UI
+# -------------------------------
 st.title("🌿 Palm Oil Leaf Nutrient Stress Detection")
 
-# STEP 2: SELECT MODEL
 model_choice = st.selectbox(
     "Select Model",
     ["MobileNetV2", "ResNet50", "CNN"]
 )
-# STEP 3: UPLOAD IMAGE
-uploaded_file = st.file_uploader("Upload Leaf Image", type=["jpg", "png", "jpeg"])
-# STEP 4: IF IMAGE UPLOADED
+
+uploaded_file = st.file_uploader("Upload Image", type=["jpg", "png", "jpeg"])
+
+# -------------------------------
+# Prediction
+# -------------------------------
 if uploaded_file is not None:
 
-    # Show image
     image = Image.open(uploaded_file).convert("RGB")
     st.image(image, caption="Uploaded Image")
 
-    # STEP 5: SELECT MODEL PATH + SIZE
+    # Select model + size
     if model_choice == "MobileNetV2":
-        model_path = "MobileNetV2_model.h5"
+        model = mobilenet_model
         size = (224, 224)
-
     elif model_choice == "ResNet50":
-        model_path = "ResNet_model.h5"
+        model = resnet_model
         size = (224, 224)
-
     else:
-        model_path = "leaf_model.h5"
-        size = (224, 224)
-        
-    # STEP 6: CHECK FILE EXISTS
-    if not os.path.exists(model_path):
-        st.error(f"❌ Model file not found: {model_path}")
-        st.stop()
-        
-    #  LOAD MODEL
-    model = tf.keras.models.load_model(model_path)
+        model = cnn_model
+        size = (150, 150)
 
-    #STEP 8: PREPROCESS IMAGE
+    # Preprocess
     image = image.resize(size)
     image = np.array(image) / 255.0
     image = np.expand_dims(image, axis=0)
 
-    # STEP 9: PREDICT
+    # Predict
     prediction = model.predict(image)
-
-    class_names = ["Healthy", "boron", "kalium", "mg", "nitrogen"]
 
     predicted_class = np.argmax(prediction)
     confidence = np.max(prediction)
-    # STEP 10: OUTPUT
+
+    # Output
     st.success(f"Prediction: {class_names[predicted_class]}")
     st.write(f"Confidence: {confidence*100:.2f}%")
 
+    # Probabilities
     st.subheader("Class Probabilities")
-
     for i, prob in enumerate(prediction[0]):
         st.write(f"{class_names[i]} : {prob*100:.2f}%")
