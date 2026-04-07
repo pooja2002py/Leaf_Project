@@ -9,7 +9,7 @@ import os
 # DOWNLOAD MODEL (FIXED)
 # -------------------------------
 def download_model(file_id, output_name):
-    url = f"https://drive.google.com/uc?export=download&id={file_id}"
+    url =f"https://drive.google.com/uc?export=download&id={file_id}"
 
     # Download if file missing OR corrupted
     if not os.path.exists(output_name) or os.path.getsize(output_name) < 1000000:
