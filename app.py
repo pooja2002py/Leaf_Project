@@ -6,13 +6,12 @@ import gdown
 import os
 
 # -------------------------------
-# Download Models (SAFE)
+# Download Models (FIXED)
 # -------------------------------
 def download_model(file_id, output_name):
-    url = f"https://drive.google.com/uc?id={file_id}"
+    url = f"https://drive.google.com/uc?export=download&id={file_id}"
 
-    # Download if not exists OR corrupted
-    if not os.path.exists(output_name) or os.path.getsize(output_name) < 1000000:
+    if not os.path.exists(output_name):
         st.write(f"Downloading {output_name}...")
         gdown.download(url, output_name, quiet=False)
 
@@ -22,23 +21,20 @@ def download_model(file_id, output_name):
 @st.cache_resource
 def load_models():
     mobilenet_id = "1jTroVKuF-e_Sb5AT5jj-W6wHIBejmsjz"
-    #resnet_id = "1fmA2GlwgevN8OjguASYb0pn2EZIFSnkw"
     cnn_id = "1JYRGz34z72QOn3B1cSb5_4Gu5KCTVRRM"
 
     # Download models
     download_model(mobilenet_id, "MobileNetV2.h5")
-    #download_model(resnet_id, "ResNet.h5")
     download_model(cnn_id, "CNN.h5")
 
     # Load models safely
     mobilenet_model = tf.keras.models.load_model("MobileNetV2.h5", compile=False)
-    #resnet_model = tf.keras.models.load_model("ResNet.h5", compile=False)
     cnn_model = tf.keras.models.load_model("CNN.h5", compile=False)
 
-    return mobilenet_model,cnn_model
+    return mobilenet_model, cnn_model
 
 # Load models
-mobilenet_model,cnn_model = load_models()
+mobilenet_model, cnn_model = load_models()
 
 # -------------------------------
 # Class Names
@@ -52,7 +48,7 @@ st.title("🌿 Palm Oil Leaf Nutrient Stress Detection")
 
 model_choice = st.selectbox(
     "Select Model",
-    ["MobileNetV2",  "CNN"]
+    ["MobileNetV2", "CNN"]
 )
 
 uploaded_file = st.file_uploader("Upload Image", type=["jpg", "png", "jpeg"])
@@ -68,12 +64,10 @@ if uploaded_file is not None:
     # Select model
     if model_choice == "MobileNetV2":
         model = mobilenet_model
-    #elif model_choice == "ResNet50":
-        #model = resnet_model
     else:
         model = cnn_model
 
-    # 🔥 AUTO INPUT SIZE FIX
+    # Auto input size
     input_shape = model.input_shape
     height, width = input_shape[1], input_shape[2]
 
