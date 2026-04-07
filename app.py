@@ -6,12 +6,12 @@ import gdown
 import os
 
 # -------------------------------
-# Download Models (FIXED)
+# Download Models (SAFE)
 # -------------------------------
 def download_model(file_id, output_name):
     url = f"https://drive.google.com/uc?id={file_id}"
 
-    # 🔥 FIX: check file exists AND size (avoid corrupted file)
+    # Download if not exists OR corrupted
     if not os.path.exists(output_name) or os.path.getsize(output_name) < 1000000:
         st.write(f"Downloading {output_name}...")
         gdown.download(url, output_name, quiet=False)
@@ -30,7 +30,7 @@ def load_models():
     download_model(resnet_id, "ResNet.h5")
     download_model(cnn_id, "CNN.h5")
 
-    # 🔥 FIX: compile=False (important)
+    # Load models safely
     mobilenet_model = tf.keras.models.load_model("MobileNetV2.h5", compile=False)
     resnet_model = tf.keras.models.load_model("ResNet.h5", compile=False)
     cnn_model = tf.keras.models.load_model("CNN.h5", compile=False)
@@ -65,19 +65,21 @@ if uploaded_file is not None:
     image = Image.open(uploaded_file).convert("RGB")
     st.image(image, caption="Uploaded Image")
 
-    # Select model + size
+    # Select model
     if model_choice == "MobileNetV2":
         model = mobilenet_model
-        size = (224, 224)
     elif model_choice == "ResNet50":
         model = resnet_model
-        size = (224, 224)
     else:
         model = cnn_model
-        size = (150, 150)
+
+    # 🔥 AUTO INPUT SIZE FIX
+    input_shape = model.input_shape
+    height, width = input_shape[1], input_shape[2]
+
+    image = image.resize((height, width))
 
     # Preprocess
-    image = image.resize(size)
     image = np.array(image) / 255.0
     image = np.expand_dims(image, axis=0)
 
