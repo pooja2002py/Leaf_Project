@@ -6,26 +6,26 @@ import gdown
 import os
 
 # -------------------------------
-# Download Models (FIXED)
+# Download Models (FINAL FIX)
 # -------------------------------
-def download_model(file_id, output_name):
-    url = f"https://drive.google.com/uc?export=download&id={file_id}"
-
+def download_model(drive_link, output_name):
     if not os.path.exists(output_name):
         st.write(f"Downloading {output_name}...")
-        gdown.download(url, output_name, quiet=False)
+        gdown.download(drive_link, output_name, quiet=False, fuzzy=True)
 
 # -------------------------------
 # Load Models (Cached)
 # -------------------------------
 @st.cache_resource
 def load_models():
-    mobilenet_id = "1jTroVKuF-e_Sb5AT5jj-W6wHIBejmsjz"
-    cnn_id = "1JYRGz34z72QOn3B1cSb5_4Gu5KCTVRRM"
+
+    # 🔥 FULL GOOGLE DRIVE LINKS (IMPORTANT)
+    mobilenet_link = "https://drive.google.com/file/d/1jTroVKuF-e_Sb5AT5jj-W6wHIBejmsjz/view?usp=sharing"
+    cnn_link = "https://drive.google.com/file/d/1JYRGz34z72QOn3B1cSb5_4Gu5KCTVRRM/view?usp=sharing"
 
     # Download models
-    download_model(mobilenet_id, "MobileNetV2.h5")
-    download_model(cnn_id, "CNN.h5")
+    download_model(mobilenet_link, "MobileNetV2.h5")
+    download_model(cnn_link, "CNN.h5")
 
     # Load models safely
     mobilenet_model = tf.keras.models.load_model("MobileNetV2.h5", compile=False)
@@ -33,7 +33,9 @@ def load_models():
 
     return mobilenet_model, cnn_model
 
+# -------------------------------
 # Load models
+# -------------------------------
 mobilenet_model, cnn_model = load_models()
 
 # -------------------------------
@@ -67,7 +69,7 @@ if uploaded_file is not None:
     else:
         model = cnn_model
 
-    # Auto input size
+    # 🔥 AUTO INPUT SIZE (NO ERROR)
     input_shape = model.input_shape
     height, width = input_shape[1], input_shape[2]
 
