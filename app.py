@@ -24,9 +24,9 @@ def load_models():
     cnn_id = "1JYRGz34z72QOn3B1cSb5_4Gu5KCTVRRM"
 
     # Download models
-    download_model(mobilenet_id, "MobileNetV2_model.h5")
-    download_model(resnet_id, "ResNet_model.h5")
-    download_model(cnn_id, "leaf_model.h5")
+    download_model(mobilenet_id, "MobileNetV2.h5")
+    download_model(resnet_id, "ResNet.h5")
+    download_model(cnn_id, "CNN.h5")
 
     # Load models
     mobilenet_model = tf.keras.models.load_model("MobileNetV2_model.h5")
