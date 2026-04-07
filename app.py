@@ -2,22 +2,21 @@ import streamlit as st
 import numpy as np
 from PIL import Image
 import tensorflow as tf
-import gdown
 import os
+import urllib.request
 
 # -------------------------------
-# Download Models (SAFE)
+# Download Models (FIXED)
 # -------------------------------
 def download_model(file_id, output_name):
-    url = f"https://drive.google.com/uc?id={file_id}"
+    url = f"https://drive.google.com/uc?export=download&id={file_id}"
 
-    # Download if not exists OR corrupted
     if not os.path.exists(output_name) or os.path.getsize(output_name) < 1000000:
         st.write(f"Downloading {output_name}...")
-        gdown.download(url, output_name, quiet=False)
+        urllib.request.urlretrieve(url, output_name)
 
 # -------------------------------
-# Load Models (Cached)
+# Load Models
 # -------------------------------
 @st.cache_resource
 def load_models():
@@ -25,19 +24,16 @@ def load_models():
     resnet_id = "1fmA2GlwgevN8OjguASYb0pn2EZIFSnkw"
     cnn_id = "1JYRGz34z72QOn3B1cSb5_4Gu5KCTVRRM"
 
-    # Download models
     download_model(mobilenet_id, "MobileNetV2.h5")
     download_model(resnet_id, "ResNet.h5")
     download_model(cnn_id, "CNN.h5")
 
-    # Load models safely
     mobilenet_model = tf.keras.models.load_model("MobileNetV2.h5", compile=False)
     resnet_model = tf.keras.models.load_model("ResNet.h5", compile=False)
     cnn_model = tf.keras.models.load_model("CNN.h5", compile=False)
 
     return mobilenet_model, resnet_model, cnn_model
 
-# Load models
 mobilenet_model, resnet_model, cnn_model = load_models()
 
 # -------------------------------
@@ -65,7 +61,6 @@ if uploaded_file is not None:
     image = Image.open(uploaded_file).convert("RGB")
     st.image(image, caption="Uploaded Image")
 
-    # Select model
     if model_choice == "MobileNetV2":
         model = mobilenet_model
     elif model_choice == "ResNet50":
@@ -73,27 +68,21 @@ if uploaded_file is not None:
     else:
         model = cnn_model
 
-    # 🔥 AUTO INPUT SIZE FIX
-    input_shape = model.input_shape
-    height, width = input_shape[1], input_shape[2]
-
+    # Auto resize
+    height, width = model.input_shape[1], model.input_shape[2]
     image = image.resize((height, width))
 
-    # Preprocess
     image = np.array(image) / 255.0
     image = np.expand_dims(image, axis=0)
 
-    # Predict
     prediction = model.predict(image)
 
     predicted_class = np.argmax(prediction)
     confidence = np.max(prediction)
 
-    # Output
     st.success(f"Prediction: {class_names[predicted_class]}")
     st.write(f"Confidence: {confidence*100:.2f}%")
 
-    # Probabilities
     st.subheader("Class Probabilities")
     for i, prob in enumerate(prediction[0]):
         st.write(f"{class_names[i]} : {prob*100:.2f}%")
