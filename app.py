@@ -3,20 +3,37 @@ import numpy as np
 from PIL import Image
 import tensorflow as tf
 import os
+import gdown
 
 # -------------------------------
-# Load Models (FROM GITHUB FILES)
+# Download Large Model (Google Drive)
+# -------------------------------
+def download_model(file_id, output_name):
+    url = f"https://drive.google.com/uc?id={file_id}"
+
+    if not os.path.exists(output_name):
+        st.write(f"Downloading {output_name}...")
+        gdown.download(url, output_name, quiet=False)
+
+# -------------------------------
+# Load Models
 # -------------------------------
 @st.cache_resource
 def load_models():
     BASE_DIR = os.path.dirname(__file__)
 
+    # Small models (from GitHub)
     mobilenet_path = os.path.join(BASE_DIR, "MobileNetV2_model.h5")
     resnet_path = os.path.join(BASE_DIR, "ResNet_model.h5")
-    cnn_path = os.path.join(BASE_DIR, "leaf_model.h5")
 
     mobilenet_model = tf.keras.models.load_model(mobilenet_path, compile=False)
     resnet_model = tf.keras.models.load_model(resnet_path, compile=False)
+
+    # Large model (from Google Drive)
+    cnn_id = "1Cwt2MaH7SPLtYqqiRNIJy0Dx3cmMXDNl"
+    cnn_path = os.path.join(BASE_DIR, "leaf_model.h5")
+
+    download_model(cnn_id, cnn_path)
     cnn_model = tf.keras.models.load_model(cnn_path, compile=False)
 
     return mobilenet_model, resnet_model, cnn_model
