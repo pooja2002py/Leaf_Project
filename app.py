@@ -13,7 +13,7 @@ def download_model(file_id, output_name):
 
     if not os.path.exists(output_name):
         st.write(f"Downloading {output_name}...")
-        gdown.download(url, output_name, quiet=False)
+        gdown.download(url, output_name, quiet=False, fuzzy=True)
 
 # -------------------------------
 # Load Models
@@ -70,7 +70,7 @@ if uploaded_file is not None:
         model = cnn_model
 
     height, width = model.input_shape[1], model.input_shape[2]
-    image = image.resize((height, width))
+    image = image.resize((width, height))
 
     image = np.array(image) / 255.0
     image = np.expand_dims(image, axis=0)
