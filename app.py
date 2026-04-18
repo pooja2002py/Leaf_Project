@@ -22,7 +22,7 @@ def download_model(file_id, output_name):
 def load_models():
     mobilenet_id = "1jTroVKuF-e_Sb5AT5jj-W6wHIBejmsjz"
     resnet_id = "1fmA2GlwgevN8OjguASYb0pn2EZIFSnkw"
-    cnn_id = "1JYRGz34z72QOn3B1cSb5_4Gu5KCTVRRM"
+    cnn_id = "1_Dk072uJoSYXbMvft53nUZ97ExKVNm0W"
 
     download_model(mobilenet_id, "MobileNetV2.h5")
     download_model(resnet_id, "ResNet.h5")
